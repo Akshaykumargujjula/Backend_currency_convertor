@@ -88,9 +88,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    secure: process.env.NODE_ENV === 'production' && process.env.FRONTEND_URL && process.env.FRONTEND_URL.startsWith('https'), // Use secure cookies only if both are HTTPS
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Allow cross-site cookies in production
   }
 }));
 
@@ -125,6 +126,17 @@ app.get('/api/cors-test', (req, res) => {
     message: 'CORS is working!',
     origin: req.headers.origin,
     frontendUrl: process.env.FRONTEND_URL,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Authentication debug endpoint
+app.get('/api/auth-test', (req, res) => {
+  res.json({ 
+    isAuthenticated: req.isAuthenticated(),
+    user: req.user || null,
+    session: req.session ? 'exists' : 'missing',
+    cookies: req.headers.cookie ? 'present' : 'missing',
     timestamp: new Date().toISOString()
   });
 });
