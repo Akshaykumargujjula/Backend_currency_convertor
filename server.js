@@ -41,12 +41,17 @@ app.use(cors({
       'http://localhost:3000', // Alternative React dev server
       'http://localhost:5173',
       'http://127.0.0.1:5173',
-      'https://localhost:5173'
+      'https://localhost:5173',
+      'https://smartcurrencyconvertor.netlify.app' // Production frontend
     ];
+    
+    console.log('CORS check - Origin:', origin);
+    console.log('CORS check - Allowed origins:', allowedOrigins);
     
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -111,6 +116,16 @@ app.get('/api/health', (req, res) => {
     status: 'OK', 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// CORS debug endpoint
+app.get('/api/cors-test', (req, res) => {
+  res.json({ 
+    message: 'CORS is working!',
+    origin: req.headers.origin,
+    frontendUrl: process.env.FRONTEND_URL,
+    timestamp: new Date().toISOString()
   });
 });
 
